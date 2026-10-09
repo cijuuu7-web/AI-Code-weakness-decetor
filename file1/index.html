@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>AI Coding Weakness Detector</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+    }
+
+    body {
+        background: #0f172a;
+        color: white;
+        min-height: 100vh;
+    }
+
+    header {
+        background: #111827;
+        padding: 20px 8%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #334155;
+    }
+
+    .logo {
+        font-size: 24px;
+        font-weight: bold;
+        color: #38bdf8;
+    }
+
+    .badge {
+        background: #1e293b;
+        padding: 8px 15px;
+        border-radius: 20px;
+        color: #94a3b8;
+        font-size: 13px;
+    }
+
+    .container {
+        width: 90%;
+        max-width: 1200px;
+        margin: 35px auto;
+    }
+
+    .hero {
+        text-align: center;
+        margin-bottom: 35px;
+    }
+
+    .hero h1 {
+        font-size: 40px;
+        margin-bottom: 12px;
+    }
+
+    .hero h1 span {
+        color: #38bdf8;
+    }
+
+    .hero p {
+        color: #94a3b8;
+        font-size: 16px;
+    }
+
+    .main-box {
+        background: #111827;
+        padding: 25px;
+        border-radius: 15px;
+        border: 1px solid #334155;
+    }
+
+    .top-controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+
+    select {
+        background: #1e293b;
+        color: white;
+        padding: 10px 15px;
+        border: 1px solid #475569;
+        border-radius: 8px;
+        outline: none;
+    }
+
+    textarea {
+        width: 100%;
+        height: 300px;
+        background: #020617;
+        color: #dbeafe;
+        border: 1px solid #334155;
+        border-radius: 10px;
+        padding: 18px;
+        font-family: monospace;
+        font-size: 14px;
+        resize: vertical;
+        outline: none;
+    }
+
+    textarea:focus {
+        border-color: #38bdf8;
+    }
+
+    .analyze-btn {
+        width: 100%;
+        margin-top: 18px;
+        padding: 14px;
+        border: none;
+        border-radius: 9px;
+        background: #0284c7;
+        color: white;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .analyze-btn:hover {
+        background: #0369a1;
+    }
+
+    .results {
+        display: none;
+        margin-top: 30px;
+    }
+
+    .score-box {
+        background: #111827;
+        border: 1px solid #334155;
+        padding: 25px;
+        border-radius: 15px;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .score {
+        font-size: 55px;
+        font-weight: bold;
+        color: #22c55e;
+    }
+
+    .score-text {
+        color: #94a3b8;
+        margin-top: 5px;
+    }
+
+    .cards {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 15px;
+    }
+
+    .card {
+        background: #111827;
+        border: 1px solid #334155;
+        padding: 20px;
+        border-radius: 12px;
+    }
+
+    .card h3 {
+        margin-bottom: 10px;
+        font-size: 15px;
+    }
+
+    .card p {
+        font-size: 25px;
+        font-weight: bold;
+        color: #38bdf8;
+    }
+
+    .issues {
+        margin-top: 20px;
+        background: #111827;
+        border: 1px solid #334155;
+        padding: 25px;
+        border-radius: 15px;
+    }
+
+    .issues h2 {
+        margin-bottom: 20px;
+    }
+
+    .issue {
+        background: #1e293b;
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 12px;
+        border-left: 4px solid #ef4444;
+    }
+
+    .issue.medium {
+        border-left-color: #f59e0b;
+    }
+
+    .issue.low {
+        border-left-color: #22c55e;
+    }
+
+    .issue strong {
+        display: block;
+        margin-bottom: 6px;
+    }
+
+    .issue span {
+        color: #94a3b8;
+        font-size: 14px;
+    }
+
+    .suggestion {
+        margin-top: 20px;
+        background: #0c4a6e;
+        border: 1px solid #0369a1;
+        padding: 20px;
+        border-radius: 12px;
+    }
+
+    .suggestion h3 {
+        margin-bottom: 10px;
+        color: #7dd3fc;
+    }
+
+    .loading {
+        display: none;
+        text-align: center;
+        margin-top: 20px;
+        color: #38bdf8;
+    }
+
+    footer {
+        text-align: center;
+        padding: 30px;
+        color: #64748b;
+        font-size: 13px;
+    }
+
+    @media(max-width: 800px) {
+        .cards {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .hero h1 {
+            font-size: 30px;
+        }
+    }
+
+    @media(max-width: 500px) {
+        .cards {
+            grid-template-columns: 1fr;
+        }
+
+        header {
+            padding: 15px;
+        }
+
+        .container {
+            width: 95%;
+        }
+    }
+</style>
+</head>
+
+<body>
+
+<header>
+    <div class="logo">⚡ CodeGuard AI</div>
+    <div class="badge">AI Coding Weakness Detector</div>
+</header>
+
+<div class="container">
+
+    <div class="hero">
+        <h1>Find Your Code's <span>Weaknesses</span></h1>
+        <p>Analyze your code and discover bugs, security issues and performance problems.</p>
+    </div>
+
+    <div class="main-box">
+
+        <div class="top-controls">
+            <h2>Code Analyzer</h2>
+
+            <select id="language">
+                <option>Python</option>
+                <option>Java</option>
+                <option>C</option>
+                <option>C++</option>
+                <option>JavaScript</option>
+            </select>
+        </div>
+
+        <textarea id="code" placeholder="Paste your code here..."></textarea>
+
+        <button class="analyze-btn" onclick="analyzeCode()">
+            🔍 Analyze My Code
+        </button>
+
+        <div class="loading" id="loading">
+            🤖 AI is analyzing your code...
+        </div>
+
+    </div>
+
+    <div class="results" id="results">
+
+        <div class="score-box">
+            <div class="score" id="score">--</div>
+            <div class="score-text">Overall Code Quality Score</div>
+        </div>
+
+        <div class="cards">
+
+            <div class="card">
+                <h3>🐛 Bugs</h3>
+                <p id="bugs">0</p>
+            </div>
+
+            <div class="card">
+                <h3>🔐 Security</h3>
+                <p id="security">0</p>
+            </div>
+
+            <div class="card">
+                <h3>⚡ Performance</h3>
+                <p id="performance">0</p>
+            </div>
+
+            <div class="card">
+                <h3>📖 Readability</h3>
+                <p id="readability">0</p>
+            </div>
+
+        </div>
+
+        <div class="issues">
+
+            <h2>Detected Weaknesses</h2>
+
+            <div id="issueList"></div>
+
+            <div class="suggestion">
+                <h3>💡 AI Recommendation</h3>
+                <p id="recommendation">
+                    Improve variable naming, error handling and code structure.
+                </p>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<footer>
+    CodeGuard AI © 2026 | AI Coding Weakness Detector
+</footer>
+
+
+<script>
+
+function analyzeCode() {
+
+    let code = document.getElementById("code").value;
+
+    if (code.trim() === "") {
+        alert("Please paste some code first!");
+        return;
+    }
+
+    document.getElementById("loading").style.display = "block";
+    document.getElementById("results").style.display = "none";
+
+    // Simulate AI analysis
+    setTimeout(function() {
+
+        let issues = [];
+        let bugs = 0;
+        let security = 0;
+        let performance = 0;
+        let readability = 0;
+
+        let lowerCode = code.toLowerCase();
+
+        // Check for print/debug statements
+        if (
+            lowerCode.includes("print(") ||
+            lowerCode.includes("console.log")
+        ) {
+            issues.push({
+                title: "Debug statement detected",
+                text: "Remove unnecessary print or console statements from production code.",
+                type: "low"
+            });
+
+            readability++;
+        }
+
+        // Check for password
+        if (
+            lowerCode.includes("password") ||
+            lowerCode.includes("passwd")
+        ) {
+            issues.push({
+                title: "Possible security weakness",
+                text: "Avoid storing passwords directly inside source code.",
+                type: "high"
+            });
+
+            security++;
+        }
+
+        // Check for SQL
+        if (
+            lowerCode.includes("select ") ||
+            lowerCode.includes("insert ") ||
+            lowerCode.includes("delete ")
+        ) {
+            issues.push({
+                title: "SQL-related code detected",
+                text: "Use parameterized queries to reduce the risk of SQL injection.",
+                type: "high"
+            });
+
+            security++;
+        }
+
+        // Check for infinite loop
+        if (
+            lowerCode.includes("while(true)") ||
+            lowerCode.includes("while (true)")
+        ) {
+            issues.push({
+                title: "Potential infinite loop",
+                text: "Make sure the loop has a clear exit condition.",
+                type: "high"
+            });
+
+            bugs++;
+        }
+
+        // Check for TODO
+        if (lowerCode.includes("todo")) {
+            issues.push({
+                title: "TODO item found",
+                text: "There may be unfinished work in this code.",
+                type: "medium"
+            });
+
+            readability++;
+        }
+
+        // Check for very long code
+        if (code.length > 1500) {
+            issues.push({
+                title: "Large code block",
+                text: "Consider splitting the code into smaller functions or modules.",
+                type: "medium"
+            });
+
+            performance++;
+        }
+
+        // If no issues
+        if (issues.length === 0) {
+            issues.push({
+                title: "No major weakness detected",
+                text: "Your code looks clean based on the basic checks performed.",
+                type: "low"
+            });
+        }
+
+        let totalProblems =
+            bugs + security + performance + readability;
+
+        let score = 100 - (totalProblems * 10);
+
+        if (score < 40) {
+            score = 40;
+        }
+
+        document.getElementById("score").innerText = score + "/100";
+
+        document.getElementById("bugs").innerText = bugs;
+        document.getElementById("security").innerText = security;
+        document.getElementById("performance").innerText = performance;
+        document.getElementById("readability").innerText = readability;
+
+        let issueHTML = "";
+
+        issues.forEach(function(issue) {
+
+            issueHTML += `
+                <div class="issue ${issue.type}">
+                    <strong>${issue.title}</strong>
+                    <span>${issue.text}</span>
+                </div>
+            `;
+
+        });
+
+        document.getElementById("issueList").innerHTML = issueHTML;
+
+        document.getElementById("recommendation").innerText =
+            "Review the detected weaknesses, improve error handling, use secure coding practices and keep your functions small and readable.";
+
+        document.getElementById("loading").style.display = "none";
+        document.getElementById("results").style.display = "block";
+
+    }, 1500);
+}
+
+</script>
+
+</body>
+</html>
